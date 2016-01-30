@@ -26,12 +26,12 @@ void Camera2D::update()
 {
 	if(needUpdate)
 	{
-		glm::vec3 translate(-position.x, -position.y, 0.0f);
-		//glm::vec3 translate(-position.x + screenWidth / 2, -position.y + screenHeight / 2, 0.0f);
+		//glm::vec3 translate(-position.x, -position.y, 0.0f);
+		glm::vec3 translate(-position.x + screenWidth / 2, -position.y + screenHeight / 2, 0.0f);
 		camMatrix = glm::translate(orthoMatrix, translate);
 		glm::vec3 scale(scale, scale, 0.0f);
-		camMatrix = glm::scale(camMatrix, scale);
-		//camMatrix = glm::scale(glm::mat4(1.0f), scale) * camMatrix;
+		//camMatrix = glm::scale(camMatrix, scale);
+		camMatrix = glm::scale(glm::mat4(1.0f), scale) * camMatrix;
 		needUpdate = false;
 	}
 }

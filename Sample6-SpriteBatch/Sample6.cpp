@@ -135,6 +135,8 @@ void Sample6::start()
 	shader.addAttribute("Color");
 	shader.addAttribute("UV");
 	shader.linkShader();
+
+	cam.setPosition(glm::vec2(GLfloat(screenWidth / 2), GLfloat(screenHeight / 2)));
 }
 
 void Sample6::input(SDL_Event e)
