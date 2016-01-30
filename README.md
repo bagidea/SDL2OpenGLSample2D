@@ -4,4 +4,8 @@
 
 -Sample 2-
 
+![ScreenShot](https://github.com/bagidea/SDL2OpenGLSample2D/blob/master/s2.png)
+
+-Sample 6-
+
 ![ScreenShot](https://fbcdn-sphotos-h-a.akamaihd.net/hphotos-ak-xap1/t31.0-8/12525345_1045975275474298_8478995989902100468_o.jpg)
