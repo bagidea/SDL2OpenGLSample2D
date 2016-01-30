@@ -97,8 +97,6 @@ void Sample3::start()
 	shader.addAttribute("Color");
 	shader.addAttribute("UV");
 	shader.linkShader();
-
-	//playerTexture = LoadImage::load("Texture/icon.png");
 }
 
 void Sample3::input(SDL_Event e)

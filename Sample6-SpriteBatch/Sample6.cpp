@@ -1,24 +1,23 @@
-#include "Sample5.h"
+#include "Sample6.h"
 
 #include <iostream>
 
-#include "LoadImage.h"
+#include "ResourceManager.h"
+#include "GLtexture.h"
 
 using namespace std;
 
 const int screenWidth = 1024;
 const int screenHeight = 768;
 
-Sample5::Sample5()
+Sample6::Sample6()
 {
 	mWindow = NULL;
 	quit = false;
-	time = 0;
-	mode = 1;
 	maxFPS = 60.0f;
 }
 
-Sample5::~Sample5()
+Sample6::~Sample6()
 {
 	SDL_DestroyWindow(mWindow);
 	mWindow = NULL;
@@ -26,7 +25,7 @@ Sample5::~Sample5()
 	SDL_Quit();
 }
 
-bool Sample5::start(const char* title, const int screenWidth, const int screenHeight)
+bool Sample6::start(const char* title, const int screenWidth, const int screenHeight)
 {
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -80,7 +79,7 @@ bool Sample5::start(const char* title, const int screenWidth, const int screenHe
 	return true;
 }
 
-void Sample5::calculateFPS()
+void Sample6::calculateFPS()
 {
 	static const int NUM_SAMPLES = 10;
 	static float frameTimes[NUM_SAMPLES];
@@ -123,32 +122,22 @@ void Sample5::calculateFPS()
 	}
 }
 
-void Sample5::start()
+void Sample6::start()
 {
 	glClearColor(0.0f, 0.0f, 0.0, 1.0f);
 
 	cam.init(screenWidth, screenHeight);
 
-	sp.push_back(new Sprite());
-	sp.back()->init(0.0f, 0.0f,screenWidth / 2, screenHeight / 2,"Texture/icon.png");
-
-	sp.push_back(new Sprite());
-	sp.back()->init(screenWidth / 2, 0.0f,screenWidth / 2, screenHeight / 2,"Texture/icon.png");
-
-	sp.push_back(new Sprite());
-	sp.back()->init(0.0f, screenHeight / 2, screenWidth / 2, screenHeight / 2,"Texture/icon.png");
-
-	sp.push_back(new Sprite());
-	sp.back()->init(screenWidth / 2, screenHeight / 2, screenWidth / 2, screenHeight / 2,"Texture/icon.png");
+	spb.init();
 	
-	shader.compileShaders("Shader/Sample3Shader.vs", "Shader/Sample3Shader.fs");
+	shader.compileShaders("Shader/Sample4Shader.vs", "Shader/Sample4Shader.fs");
 	shader.addAttribute("Position");
 	shader.addAttribute("Color");
 	shader.addAttribute("UV");
 	shader.linkShader();
 }
 
-void Sample5::input(SDL_Event e)
+void Sample6::input(SDL_Event e)
 {
 	float speedCam = 10.0f;
 
@@ -185,16 +174,8 @@ void Sample5::input(SDL_Event e)
 	}
 }
 
-void Sample5::update()
+void Sample6::update()
 {
-	time += 0.01f;
-
-	if(time >= 50)
-	{
-		mode *= -1;
-		time = 0;
-	}
-
 	cam.update();
 
 	shader.use();
@@ -202,20 +183,31 @@ void Sample5::update()
 	GLuint texUniform = shader.getUniformLocation("myTex");
 	glUniform1i(texUniform, 0);
 
-	GLuint timeUniform = shader.getUniformLocation("time");
-	glUniform1f(timeUniform, time);
-
-	GLuint modeUniform = shader.getUniformLocation("mode");
-	glUniform1i(modeUniform, mode);
-
 	GLuint pLocation = shader.getUniformLocation("P");
 	glm::mat4 cameraMatrix = cam.getCameraMatrix();
 	glUniformMatrix4fv(pLocation, 1, GL_FALSE, &cameraMatrix[0][0]);
 
-	for(int i = 0; i < sp.size(); i++)
+	spb.begin();
+
+	glm::vec4 pos(10.0f, 10.0f, 50.0f, 50.0f);
+	glm::vec4 uv(0.0f, 0.0f, 1.0f, 1.0f);
+	static GLtexture texture = ResourceManager::getTexture("Texture/icon.png");
+	Color color;
+	color.r = 255;
+	color.g = 255;
+	color.b = 255;
+	color.a = 255;
+
+	for(int i = 0; i < 20; i++)
 	{
-		sp[i]->draw();
+		for(int a = 0; a < 15; a++)
+		{
+			spb.draw(pos + glm::vec4(i*50.0f, a*50.0f, 0.0f, 0.0f), uv, texture.id, 0, color);
+		}
 	}
+
+	spb.end();
+	spb.render();
 
 	shader.unUse();
 
@@ -241,9 +233,9 @@ void Sample5::update()
 
 int main(int argc, char* argv[])
 {
-	Sample5 app;
+	Sample6 app;
 
-	app.start("Sample5 Window", screenWidth, screenHeight);
+	app.start("Sample6 Window", screenWidth, screenHeight);
 
 	return 0;
 }
