@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "ResourceManager.h"
-#include "GLtexture.h"
 
 using namespace std;
 

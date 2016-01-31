@@ -1,4 +1,4 @@
-#include "Sample6.h"
+#include "Sample8.h"
 
 #include <iostream>
 
@@ -9,14 +9,14 @@ using namespace std;
 const int screenWidth = 1024;
 const int screenHeight = 768;
 
-Sample6::Sample6()
+Sample8::Sample8()
 {
 	mWindow = NULL;
 	quit = false;
 	maxFPS = 60.0f;
 }
 
-Sample6::~Sample6()
+Sample8::~Sample8()
 {
 	SDL_DestroyWindow(mWindow);
 	mWindow = NULL;
@@ -24,7 +24,7 @@ Sample6::~Sample6()
 	SDL_Quit();
 }
 
-bool Sample6::start(const char* title, const int screenWidth, const int screenHeight)
+bool Sample8::start(const char* title, const int screenWidth, const int screenHeight)
 {
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -78,7 +78,7 @@ bool Sample6::start(const char* title, const int screenWidth, const int screenHe
 	return true;
 }
 
-void Sample6::calculateFPS()
+void Sample8::calculateFPS()
 {
 	static const int NUM_SAMPLES = 10;
 	static float frameTimes[NUM_SAMPLES];
@@ -121,7 +121,7 @@ void Sample6::calculateFPS()
 	}
 }
 
-void Sample6::start()
+void Sample8::start()
 {
 	glClearColor(0.0f, 0.0f, 0.0, 1.0f);
 
@@ -134,13 +134,13 @@ void Sample6::start()
 	shader.addAttribute("Color");
 	shader.addAttribute("UV");
 	shader.linkShader();
-
-	cam.setPosition(glm::vec2(GLfloat(screenWidth / 2), GLfloat(screenHeight / 2)));
 }
 
-void Sample6::input(SDL_Event e)
+void Sample8::input(SDL_Event e)
 {
 	float speedCam = 10.0f;
+
+	glm::vec2 worldPos = cam.screenToWorldPoint(glm::vec2(e.motion.x, e.motion.y));
 
 	if(e.type == SDL_KEYDOWN)
 	{
@@ -173,11 +173,33 @@ void Sample6::input(SDL_Event e)
 			cam.setScale(cam.getScale() - 0.1f);
 		}
 	}
+	else if(e.type == SDL_MOUSEBUTTONDOWN)
+	{
+		if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) 
+		{
+			glm::vec2 playerPosition(-15.0f, -15.0f);
+			glm::vec2 direction = glm::vec2(worldPos.x - 15.0f, worldPos.y - 15.0f) - playerPosition;
+			direction = glm::normalize(direction);
+
+			bullets.emplace_back(playerPosition, direction, 5.0f, 1000);
+		}
+	}
 }
 
-void Sample6::update()
+void Sample8::update()
 {
 	cam.update();
+
+	for(int i = 0; i < bullets.size();)
+	{
+		if(!bullets[i].update())
+		{
+			bullets[i] = bullets.back();
+			bullets.pop_back();
+		}else{
+			i++;
+		}
+	}
 
 	shader.use();
 
@@ -190,22 +212,20 @@ void Sample6::update()
 
 	spb.begin();
 
-	glm::vec4 pos(10.0f, 10.0f, 50.0f, 50.0f);
+	glm::vec4 pos(-256.0f, -256.0f, 512.0f, 512.0f);
 	glm::vec4 uv(0.0f, 0.0f, 1.0f, 1.0f);
-	static GLtexture texture = ResourceManager::getTexture("Texture/icon.png");
+	static GLtexture texture = ResourceManager::getTexture("Texture/Pointer.png");
+
 	Color color;
 	color.r = 255;
 	color.g = 255;
 	color.b = 255;
 	color.a = 255;
 
-	for(int i = 0; i < 20; i++)
-	{
-		for(int a = 0; a < 15; a++)
-		{
-			spb.draw(pos + glm::vec4(i*50.0f, a*50.0f, 0.0f, 0.0f), uv, texture.id, 0, color);
-		}
-	}
+	spb.draw(pos, uv, texture.id, 0, color);
+
+	for(int i = 0; i < bullets.size(); i++)
+		bullets[i].draw(spb);
 
 	spb.end();
 	spb.render();
@@ -219,7 +239,7 @@ void Sample6::update()
 
 	static int frameCounter = 0;
 	frameCounter++;
-	if(frameCounter == 10)
+	if(frameCounter == 100)
 	{
 		cout << "FPS: " << FPS << endl;
 		frameCounter = 0;
@@ -234,9 +254,9 @@ void Sample6::update()
 
 int main(int argc, char* argv[])
 {
-	Sample6 app;
+	Sample8 app;
 
-	app.start("Sample6 Window", screenWidth, screenHeight);
+	app.start("Sample8 Window", screenWidth, screenHeight);
 
 	return 0;
 }
